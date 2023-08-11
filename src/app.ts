@@ -28,13 +28,13 @@ const corsOptions = {
   },
   credentials: true
 };
-app.use("/uploads/categories", express.static("uploads/categories"));
-app.use("/uploads/products", express.static("uploads/products"));
-app.use("/uploads/roomBanner", express.static("uploads/roomsBanner"));
-app.use(
-  "/uploads/organizationLogo",
-  express.static("uploads/organizationLogo")
-);
+// app.use("/uploads/categories", express.static("uploads/categories"));
+// app.use("/uploads/products", express.static("uploads/products"));
+// app.use("/uploads/roomBanner", express.static("uploads/roomsBanner"));
+// app.use(
+//   "/uploads/organizationLogo",
+//   express.static("uploads/organizationLogo")
+// );
 
 app.use(cors(corsOptions));
 app.set("trust proxy", true);
