@@ -3,20 +3,24 @@ import Room from "../models/room";
 import { Organization } from "../../src/models";
 import Category from "../../src/models/category";
 import Product from "../../src/models/product";
+import { ObjectId } from "mongodb";
 
 // Create a new product
 export const Create__ROOM__POST = async (req: Request, res: Response) => {
   try {
     const user = req.user;
 
-    const isHasRoom = await Room.findOne({ organization: user.organization });
+    const isHasRoom = await Room.findOne({
+      organization: new ObjectId(user.organization)
+    });
 
     const { title, description } = req.body;
-
     if (isHasRoom) {
-      const roomToChange = await Room.findById({
-        organization: user.organization
+      const roomToChange = await Room.findOne({
+        organization: new ObjectId(user.organization)
       });
+
+      console.log(roomToChange);
 
       roomToChange.title = title;
       roomToChange.description = description;
@@ -47,7 +51,7 @@ export const Upload__ROOM_IMAGE__POST = async (req: Request, res: Response) => {
   }
   if (files["roomBanner"]?.[0]) {
     const roomBannerFile = files["roomBanner"]?.[0];
-    room.roomBanner = roomBannerFile.filename;
+    room.roomBanner = "roomBanner/" + roomBannerFile.filename;
   } else {
     return res
       .status(400)
@@ -113,9 +117,9 @@ export const Fetch__ROOMS_FOR_CLIENT__GET = async (
   res: Response
 ) => {
   try {
-    const room = await Room.find();
+    const rooms = await Room.find();
 
-    return res.json({ status: "success", data: room });
+    return res.json({ status: "success", data: rooms });
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }
@@ -125,23 +129,7 @@ export const Fetch__CATEGORIES_PRODUCTS_FOR_CLIENT__GET = async (
   res: Response
 ) => {
   try {
-    var { roomName, categoryID } = req.params;
-
-    if (!roomName) {
-      return res
-        .status(404)
-        .json({ status: "error", error: "Room Name is required" });
-    }
-
-    roomName = roomName.split("_").join(" ");
-    const room = await Room.findOne({ title: roomName });
-
-    if (!room) {
-      return res
-        .status(404)
-        .json({ status: "error", error: "Invalid Room Name" });
-    }
-    const organization = await Organization.findById(room.organization);
+    var { categoryID } = req.params;
 
     const organizationCategory = await Category.findOne({
       _id: categoryID
@@ -149,16 +137,44 @@ export const Fetch__CATEGORIES_PRODUCTS_FOR_CLIENT__GET = async (
 
     const categoryProducts = await Product.find({
       category: { $in: [organizationCategory._id] }
-    });
+    })
+      .populate("category")
+      .exec();
 
     const categoryProductsAndType = {
       organizationCategory,
       categoryProducts
     };
 
+    console.log(
+      "Fetch__CATEGORIES_PRODUCTS_FOR_CLIENT__GET : ",
+      categoryProductsAndType
+    );
     return res.json({
       status: "success",
       data: categoryProductsAndType
+    });
+  } catch (error) {
+    res.status(500).json({ status: "error", error: error.message });
+  }
+};
+export const Fetch__CATEGORY_FOR_CLIENT__GET = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    var { categoryID } = req.params;
+
+    const category = await Category.findById(categoryID);
+    if (!category) {
+      return res
+        .status(404)
+        .json({ status: "error", error: "Invalid Category ID" });
+    }
+
+    return res.json({
+      status: "success",
+      data: category
     });
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
@@ -169,7 +185,6 @@ export const Fetch__ROOM__GET = async (req: Request, res: Response) => {
   try {
     const user = req.user;
     if (req.permissions?.readOwn) {
-      console.log(user.organization);
       const room = await Room.findOne({ organization: user.organization });
 
       if (!room) {

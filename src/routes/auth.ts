@@ -12,11 +12,7 @@ import { ValidateRequest } from "../middleware/validate-request";
 
 const authRouter = express.Router();
 
-authRouter.post(
-  "/signin",
-
-  SignIn__AUTH__POST
-);
+authRouter.post("/signin", SignIn__AUTH__POST);
 authRouter.post(
   "/signup",
   [

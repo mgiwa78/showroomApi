@@ -4,10 +4,12 @@ import generateVerificationToken from "../services/organization-token";
 import sendApproveSuccessMail from "../services/sendApproveSuccessMail";
 import sendConfirmRequestMail from "../services/sendConfirmRequestMail";
 import { createToken } from "../services/tokenMethods";
+import { Password } from "../services/password";
 
 export const Create__REQUEST__POST = async (req: Request, res: Response) => {
   try {
     const { organizationDetails, contactPerson } = req.body;
+
     const request = await RequestModel.create({
       organizationDetails: {
         name: organizationDetails.name,
@@ -63,11 +65,16 @@ export const Approve__REQUEST__PUT = async (req: Request, res: Response) => {
 
     organization.verificationToken = OrgverificationToken;
     organization.save();
+    console.log(newRequest);
+
+    const hashedPassword = await Password.toHash("Password");
 
     await User.create({
       email: newRequest.contactPerson.email,
-      password: "temporary_password",
-      role: "admin",
+      password: hashedPassword,
+      role: ["Organization Admin"],
+      lastName: newRequest.contactPerson.lastName,
+      firstName: newRequest.contactPerson.firstName,
       organization: organization._id
     });
 

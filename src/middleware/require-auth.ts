@@ -2,6 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { JWT_SECRET } from "../__CONSTANTS__";
 import { User } from "../models";
+import { OrganizationDoc, OrganizationModel } from "../models/organization";
 
 interface DecodedToken extends JwtPayload {
   userId: string;
@@ -31,7 +32,9 @@ export const AuthenticateUser = async (
       return res.status(401).json({ status: "error", error: "Invalid Token" });
     }
 
-    const userData = await User.findById(decoded.user._id);
+    const userData = await User.findById(decoded.user._id)
+      .populate("organization")
+      .exec();
 
     if (userData) {
       req.user = {

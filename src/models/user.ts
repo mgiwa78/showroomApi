@@ -13,6 +13,11 @@ interface User {
 }
 
 import { Permission } from "accesscontrol";
+import {
+  OrganizationDoc,
+  OrganizationModel,
+  TOrganization
+} from "./organization";
 interface Allowed {
   readOwn?: Permission;
   readAny?: Permission;

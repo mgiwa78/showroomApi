@@ -33,6 +33,7 @@ export const Upload__CATEGORY_IMAGE__POST = async (
       .status(400)
       .json({ status: "error", message: "Invalid Category ID" });
   }
+
   if (files["categoryBanner"]?.[0]) {
     const categoryBannerFile = files["categoryBanner"]?.[0];
     category.categoryBanner = "categories/" + categoryBannerFile.filename;

@@ -1,6 +1,6 @@
 import { Document, Model, model, Schema } from "mongoose";
 
-interface Organization {
+export interface TOrganization {
   name: string;
   logo: string;
   description: string;
@@ -10,9 +10,8 @@ interface Organization {
   verificationToken?: string;
 }
 
-interface OrganizationModel extends Model<OrganizationDoc> {}
-
-interface OrganizationDoc extends Organization, Document {}
+export interface OrganizationModel extends Model<OrganizationDoc> {}
+export interface OrganizationDoc extends TOrganization, Document {}
 
 const organizationSchema = new Schema<OrganizationDoc, OrganizationModel>({
   name: { type: String, required: true },
